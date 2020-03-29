@@ -1,0 +1,100 @@
+        % % Title and author(s)
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\title{Let Us Do Some Fancy NLP Shit}
+\author{Jingcheng Xu \and Xiating Ouyang}
+\date{}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\documentclass[10pt]{article}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% %
+% % The next command allows your in import encapsulated
+% % postscript files, .epsf or .eps files, which
+% % contain vector graphic image data.
+% %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\usepackage{graphicx}
+\usepackage{charter,eulervm}
+
+%\renewcommand{\baselinestretch}{1.5}
+\setcounter{secnumdepth}{3} % default value for 'report' class is "2"
+\usepackage{amsthm,amsmath,amssymb,upgreek,marvosym,mathtools}
+\usepackage{array}
+\usepackage{makeidx}  % allows for indexgeneration
+\usepackage{paralist}
+\usepackage{subfig}
+\usepackage{tabularx}
+\usepackage{tabu}
+\usepackage{comment}
+\usepackage[nottoc]{tocbibind}
+\usepackage[usenames,dvipsnames]{color}
+\usepackage[pdftex,breaklinks,colorlinks,citecolor={blue}, linkcolor={blue},urlcolor=Maroon]{hyperref}
+\usepackage{tkz-graph}
+\usepackage{geometry}
+ \geometry{
+ left=25mm,
+ top=20mm,
+ right=25mm,
+ }
+\usetikzlibrary{automata, positioning,arrows,shapes,decorations.pathmorphing}
+
+ \tikzset{
+->, % makes the edges directed
+>=stealth, % makes the arrow heads bold
+node distance=3cm, % specifies the minimum distance between two nodes. Change if necessary.
+every state/.style={thick, fill=gray!10}, % sets the properties for each ’state’ node
+initial text=$ $, % sets the text that appears on the start arrow
+}
+
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{lemma}{Lemma}[section]
+\newtheorem{reduction}{Reduction}[section]
+\newtheorem{proposition}{Proposition}[section]
+\newtheorem{claim}{Claim}[section]
+\newtheorem{scolium}{Scolium}[section]   %% And a not so common one.
+\newtheorem{definition}{Definition}[section]
+\newtheorem{conjecture}{Conjecture}[section]
+\newtheorem{corollary}{Corollary}[section]
+%\newenvironment{proof}{{\sc Proof:}}{~\hfill QED}
+\newenvironment{AMS}{}{}
+\newenvironment{keywords}{}{}
+\DeclarePairedDelimiter{\norm}{\lVert}{\rVert}
+\newcommand{\todo}{(TO BE CONTINUED...)}
+
+\newcommand{\paris}[1]{{\color{blue} Paris: [{#1}]}}
+
+
+\newcommand{\trans}[1]{
+    #1^\mathsf{T}
+}
+
+\newcommand{\db}{$\mathbf{db}$}
+
+\newcommand{\qclass}{\texttt{acyclic-binBCQ}}
+
+\newcommand{\bcq}{\texttt{bcq}}
+\newcommand{\problem}[1]{\textsc{certainty}($#1$)}
+\newcommand{\FO}{$\mathbf{FO}$}
+\newcommand{\PTIME}{$\mathbf{P}$}
+\newcommand{\LSPACE}{$\mathbf{L}$}
+\newcommand{\coNP}{$\mathbf{coNP}$}
+\newcommand{\und}[1]{\underline{#1}}
+\newcommand{\NL}{$\mathbf{NL}$}
+\newcommand{\tsubset}[4]{$#1 \leq_{#2 \rightarrow #4} #3$}
+\newcommand{\ntsubset}[4]{$#1 \nleq_{#2 \rightarrow #4} #3$}
+
+\newcommand{\define}[1]{\textcolor{red}{#1}}
+
+\begin{document}
+\newpage
+\maketitle
+
+\abstract{We study the data complexity of consistent query answering (CQA) on databases that may violate the primary-key constraints. A repair is a maximal consistent subset of the database. For a boolean conjunctive query $q$, the problem \problem{q} asks whether all repairs of an inconsistent database input satisfies the query $q$ or not. It is shown that for any self-join-free boolean conjunctive query $q$, \problem{q} depicts an trichotomy of \FO, \LSPACE-complete and \coNP-complete \cite{koutris_et_al:LIPIcs:2019:10325}. We prove that for boolean conjunctive acyclic queries on binary atoms, \problem{q} displays a dichotomy: it is either in \FO\ or \NL-hard, and it is decidable in polynomial-time which of the two cases applies. In particular, we prove that for boolean conjunctive path queries on binary atoms, \problem{q} already displays a trichotomy: it is in \FO, \NL-complete or \coNP-complete, and it is decidable in polynomial-time which of the three cases applies.}
+
+
+\bibliography{note}{}
+\bibliographystyle{plain}
+
+\end{document}
+
+
+
