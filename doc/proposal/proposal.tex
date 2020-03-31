@@ -1,6 +1,6 @@
         % % Title and author(s)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\title{Let Us Do Some Fancy NLP Shit}
+\title{CS 760 Course Project Proposal}
 \author{Jingcheng Xu \and Xiating Ouyang}
 \date{}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -88,8 +88,23 @@ initial text=$ $, % sets the text that appears on the start arrow
 \newpage
 \maketitle
 
-\abstract{We study the data complexity of consistent query answering (CQA) on databases that may violate the primary-key constraints. A repair is a maximal consistent subset of the database. For a boolean conjunctive query $q$, the problem \problem{q} asks whether all repairs of an inconsistent database input satisfies the query $q$ or not. It is shown that for any self-join-free boolean conjunctive query $q$, \problem{q} depicts an trichotomy of \FO, \LSPACE-complete and \coNP-complete \cite{koutris_et_al:LIPIcs:2019:10325}. We prove that for boolean conjunctive acyclic queries on binary atoms, \problem{q} displays a dichotomy: it is either in \FO\ or \NL-hard, and it is decidable in polynomial-time which of the two cases applies. In particular, we prove that for boolean conjunctive path queries on binary atoms, \problem{q} already displays a trichotomy: it is in \FO, \NL-complete or \coNP-complete, and it is decidable in polynomial-time which of the three cases applies.}
+\section{Topic}
+We plan to work on the applicaiton of neural networks to natural
+language processing.  There is a currently running competition
+\href{https://www.kaggle.com/c/tweet-sentiment-extraction}{Tweet
+  Sentiment Extraction} on Kaggle.  The problem is that given a tweet
+\emph{and} a positive/negative/neutral sentiment label, to extract the
+best supporting phrases in the tweet.  We plan to use encoder-decoder
+architecture in RNN to solve the problem.
 
+\section{Plan}
+\begin{enumerate}
+\item Read on the topic of the usage of RNNs in NLP problems and get
+  familiar with existing tools (e.g.\ BERT, ELMo) 
+\item Come up with an architecture for this problem and iterate on the
+  design to achieve better performance
+\item Participate in the competition if the results are good enough
+\end{enumerate}
 
 \bibliography{note}{}
 \bibliographystyle{plain}
