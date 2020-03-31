@@ -5,3 +5,22 @@
 *.bbl
 *.blg
 
+cache_dir/
+cache_dir/*
+
+data/
+data/*
+
+outputs/
+outputs/*
+
+runs/
+runs/*
+
+transformers/
+transformers/*
+
+env/
+env/*
+
+submission.csv
