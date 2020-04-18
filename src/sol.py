@@ -3,11 +3,14 @@ import pandas as pd
 import json
 
 
-train_df = pd.read_csv('./data/train.csv')
-test_df = pd.read_csv('./data/test.csv')
-sub_df = pd.read_csv('./data/sample_submission.csv')
+train_df = pd.read_csv('../input/tweet-sentiment-extraction/train.csv')
+test_df = pd.read_csv('../input/tweet-sentiment-extraction/test.csv')
+sub_df = pd.read_csv('../input/tweet-sentiment-extraction/sample_submission.csv')
 
 train = np.array(train_df)
+# shuffle and subset
+np.random.shuffle(train)
+train = train[1:1000]
 test = np.array(test_df)
 
 
@@ -15,9 +18,7 @@ test = np.array(test_df)
 SETTINGS
 """
 
-use_cuda = False # whether to use GPU or not
-
-
+# use_cuda = False # whether to use GPU or not
 
 def find_all(input_str, search_str):
     l1 = []
@@ -63,7 +64,7 @@ def do_qa_train(train):
 
 qa_train = do_qa_train(train)
 
-with open('./data/train.json', 'w') as outfile:
+with open('../working/train.json', 'w') as outfile:
     json.dump(qa_train, outfile)
 
 
@@ -98,7 +99,7 @@ def do_qa_test(test):
 
 qa_test = do_qa_test(test)
 
-with open('./data/test.json', 'w') as outfile:
+with open('../working/test.json', 'w') as outfile:
     json.dump(qa_test, outfile)
 
 
@@ -113,15 +114,16 @@ model = QuestionAnsweringModel('distilbert',
                                args={'reprocess_input_data': True,
                                      'overwrite_output_dir': True,
                                      'learning_rate': 5e-5,
-                                     'num_train_epochs': 2,
-                                     'max_seq_length': 192,
+                                     'num_train_epochs': 5,
+                                     'max_seq_length': 80,
                                      'doc_stride': 64,
+                                     'train_batch_size': 4,
                                      'fp16': False,
 
                                     },
-                                use_cuda=False)
+                                use_cuda=True)
 
-model.train_model('data/train.json')
+model.train_model('../working/train.json')
 
 
 
