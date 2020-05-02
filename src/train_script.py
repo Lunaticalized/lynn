@@ -54,6 +54,8 @@ sub_df = pd.read_csv('../input/tweet-sentiment-extraction/sample_submission.csv'
 
 train = np.array(train_df)
 
+# train = train[0:10]
+
 def find_start_end_token_pos(input_str, sub_str, tokenizer):
     input = tokenizer.encode(input_str)
     output = tokenizer.encode(sub_str)
@@ -74,7 +76,7 @@ train = np.array(train, dtype = [('text', 'U144'), ('start', 'i'), ('end', 'i')]
 
 # build the dataset
 # ignore sentiment label for now
-BATCH_SIZE = 32
+BATCH_SIZE = 96
 
 def collate_tweets(sample):
     'given a list of samples, pad the encodings to the same length, and return the samples'
@@ -101,7 +103,7 @@ optimizer = optim.SGD(model.parameters(), lr=5e-5)
 
 model.train()
 
-num_epochs = 5
+num_epochs = 10
 for epoch in range(num_epochs):
     running_loss = 0.0
     for step, batch in enumerate(loader):
@@ -116,9 +118,9 @@ for epoch in range(num_epochs):
         optimizer.step()
 
         running_loss += loss.item()
-        if step % 5 == 0:    # print every 5 mini-batches
+        if step % 10 == 0:    # print every 5 mini-batches
             print('[%d, %5d] loss: %.3f' %
-                  (epoch + 1, step + 1, running_loss / 5))
+                  (epoch + 1, step, running_loss / 10))
             running_loss = 0.0
 
 print('finished training')
@@ -140,5 +142,9 @@ with torch.no_grad():
         ans.append(tokenizer.decode(input[start:end]))
 
 with open('ans.txt', 'w') as file:
-    for item in ans:
+    for i,item in enumerate(ans):
         file.write('%s\n' % item)
+        if i % 50 == 0:
+            print('testing: ', i, '/', len(test))
+
+print('done')
