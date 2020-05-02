@@ -53,15 +53,6 @@ test_df = pd.read_csv('../input/tweet-sentiment-extraction/test.csv', keep_defau
 sub_df = pd.read_csv('../input/tweet-sentiment-extraction/sample_submission.csv')
 
 train = np.array(train_df)
-train = train[0:1000]
-
-# remove empty entries
-
-# this is no good, need positions as token lists
-def find_start_end(input_str, sub_str):
-    start = input_str.find(sub_str)
-    end = start + len(sub_str)
-    return start, end
 
 def find_start_end_token_pos(input_str, sub_str, tokenizer):
     input = tokenizer.encode(input_str)
@@ -140,7 +131,7 @@ test = np.array(test_df['text'])
 model.to(torch.device('cpu'))
 ans = []
 with torch.no_grad():
-    for item in test[0:3]:
+    for item in test:
         input = tokenizer.encode(item)
         out = model(torch.tensor(input).unsqueeze(0))
         start_logits, end_logits, *_ = out
@@ -148,7 +139,6 @@ with torch.no_grad():
         end = np.argmax(end_logits.squeeze(0))
         ans.append(tokenizer.decode(input[start:end]))
 
-ans = ["", "abc", "wtf!!", "", "yay"]
 with open('ans.txt', 'w') as file:
     for item in ans:
         file.write('%s\n' % item)

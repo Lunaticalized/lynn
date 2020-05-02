@@ -1,0 +1,13 @@
+{
+  "id": "coldcat/lynnneh-try",
+  "title": "lynnneh-try",
+  "code_file": "src/train_script.py",
+  "language": "python",
+  "kernel_type": "script",
+  "is_private": "true",
+  "enable_gpu": "true",
+  "enable_internet": "true",
+  "dataset_sources": [],
+  "competition_sources": ["tweet-sentiment-extraction"],
+  "kernel_sources": []
+}
