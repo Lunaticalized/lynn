@@ -1,3 +1,11 @@
 \section{Introduction} \label{sec:introduction}
 
-Twitter has become a popular platform for people to share inforamtion in the Internet era. To date, roughly 60,00 tweets are sent per second, corresponding to 500M tweets sent per day. This huge volume of tweets allows the use of machine learning to study the user's behavior and emotion for tasks such as election result prediction and commercial product recommendation. 
+Sentiment analysis is a critical task for industries involving product recommendation or social behavior prediction. In an Internet era, the volume of information explodes exponentially and it becoming increasingly inpractical for the industries to study each feedback or opinion from its customer manually. Twitter has become a popular social media with roughly 6,000 tweets sent per second, corresponding to 500M tweets sent per day. This huge volume of tweets allows the use of machine learning for industry owners to automatically classify the sentiments of the tweet senders into positive, neutral or negative, so that the industry owners could understand the users' sentiments for their business planning. 
+
+Support phrase extraction extends beyond the classification task---given the sentiment of the tweet, it also asks for the specific phrase within the tweet that supports the classified sentiment. This allows a more fine-grained representation of the tweet senders' sentiments. Currently there is an undergoing \href{https://www.kaggle.com/c/tweet-sentiment-extraction}{Kaggle competition} for support phrase extraction: Given a set tweets, each with its true emotional label, find the supporting phrase within each tweet supporting its sentiment. 
+
+
+Our solution uses BERT (Bidirectional Encoder Representations from Transformers), a state-of-the-art tool for sentiment analysis \cite{devlin2018bert}. 
+
+
+\paragraph{Organization} In Section~\ref{sec:model} we describe the input dataset and our model; In Section~\ref{sec:experiment} we present the experimental results of our model; and finally in Section\ref{sec:discussion} we discuss some limitations of our model.
