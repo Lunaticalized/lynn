@@ -1,94 +1,74 @@
-        % % Title and author(s)
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\documentclass{article}
+
+% if you need to pass options to natbib, use, e.g.:
+%     \PassOptionsToPackage{numbers, compress}{natbib}
+% before loading neurips_2018
+
+% ready for submission
+% \usepackage{neurips_2018}
+
+% to compile a preprint version, e.g., for submission to arXiv, add add the
+% [preprint] option:
+%     \usepackage[preprint]{neurips_2018}
+
+% to compile a camera-ready version, add the [final] option, e.g.:
+     \usepackage[final]{nips_2018}
+
+% to avoid loading the natbib package, add option nonatbib:
+%     \usepackage[nonatbib]{neurips_2018}
+
+\usepackage[utf8]{inputenc} % allow utf-8 input
+\usepackage[T1]{fontenc}    % use 8-bit T1 fonts
+\usepackage{hyperref}       % hyperlinks
+\usepackage{url}            % simple URL typesetting
+\usepackage{booktabs}       % professional-quality tables
+\usepackage{amsfonts}       % blackboard math symbols
+\usepackage{nicefrac}       % compact symbols for 1/2, etc.
+\usepackage{microtype}      % microtypography
+
 \title{Tweet Sentiment Extraction}
-\author{Jingcheng Xu \and Xiating Ouyang}
-\date{}
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\documentclass[10pt]{article}
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% %
-% % The next command allows your in import encapsulated
-% % postscript files, .epsf or .eps files, which
-% % contain vector graphic image data.
-% %
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\usepackage{graphicx}
-\usepackage{charter,eulervm}
 
-%\renewcommand{\baselinestretch}{1.5}
-\setcounter{secnumdepth}{3} % default value for 'report' class is "2"
-\usepackage{amsthm,amsmath,amssymb,upgreek,marvosym,mathtools}
-\usepackage{array}
-\usepackage{makeidx}  % allows for indexgeneration
-\usepackage{paralist}
-\usepackage{subfig}
-\usepackage{tabularx}
-\usepackage{tabu}
-\usepackage{comment}
-\usepackage[nottoc]{tocbibind}
-\usepackage[usenames,dvipsnames]{color}
-\usepackage[pdftex,breaklinks,colorlinks,citecolor={blue}, linkcolor={blue},urlcolor=Maroon]{hyperref}
-\usepackage{tkz-graph}
-\usepackage{geometry}
- \geometry{
- left=25mm,
- top=20mm,
- right=25mm,
- }
-\usetikzlibrary{automata, positioning,arrows,shapes,decorations.pathmorphing}
+% The \author macro works with any number of authors. There are two commands
+% used to separate the names and addresses of multiple authors: \And and \AND.
+%
+% Using \And between authors leaves it to LaTeX to determine where to break the
+% lines. Using \AND forces a line break at that point. So, if LaTeX puts 3 of 4
+% authors names on the first line, and the last on the second line, try using
+% \AND instead of \And before the third author name.
 
- \tikzset{
-->, % makes the edges directed
->=stealth, % makes the arrow heads bold
-node distance=3cm, % specifies the minimum distance between two nodes. Change if necessary.
-every state/.style={thick, fill=gray!10}, % sets the properties for each ’state’ node
-initial text=$ $, % sets the text that appears on the start arrow
+\author{%
+  Jingcheng Xu \\
+  % examples of more authors
+  \And
+  Xiating Ouyang \\
+  % Affiliation \\
+  % Address \\
+  % \texttt{email} \\
+  % \AND
+  % Coauthor \\
+  % Affiliation \\
+  % Address \\
+  % \texttt{email} \\
+  % \And
+  % Coauthor \\
+  % Affiliation \\
+  % Address \\
+  % \texttt{email} \\
+  % \And
+  % Coauthor \\
+  % Affiliation \\
+  % Address \\
+  % \texttt{email} \\
 }
-
-\newtheorem{theorem}{Theorem}[section]
-\newtheorem{lemma}{Lemma}[section]
-\newtheorem{reduction}{Reduction}[section]
-\newtheorem{proposition}{Proposition}[section]
-\newtheorem{claim}{Claim}[section]
-\newtheorem{scolium}{Scolium}[section]   %% And a not so common one.
-\newtheorem{definition}{Definition}[section]
-\newtheorem{conjecture}{Conjecture}[section]
-\newtheorem{corollary}{Corollary}[section]
-%\newenvironment{proof}{{\sc Proof:}}{~\hfill QED}
-\newenvironment{AMS}{}{}
-\newenvironment{keywords}{}{}
-\DeclarePairedDelimiter{\norm}{\lVert}{\rVert}
-\newcommand{\todo}{(TO BE CONTINUED...)}
-
-\newcommand{\paris}[1]{{\color{blue} Paris: [{#1}]}}
-
-
-\newcommand{\trans}[1]{
-    #1^\mathsf{T}
-}
-
-\newcommand{\db}{$\mathbf{db}$}
-
-\newcommand{\qclass}{\texttt{acyclic-binBCQ}}
-
-\newcommand{\bcq}{\texttt{bcq}}
-\newcommand{\problem}[1]{\textsc{certainty}($#1$)}
-\newcommand{\FO}{$\mathbf{FO}$}
-\newcommand{\PTIME}{$\mathbf{P}$}
-\newcommand{\LSPACE}{$\mathbf{L}$}
-\newcommand{\coNP}{$\mathbf{coNP}$}
-\newcommand{\und}[1]{\underline{#1}}
-\newcommand{\NL}{$\mathbf{NL}$}
-\newcommand{\tsubset}[4]{$#1 \leq_{#2 \rightarrow #4} #3$}
-\newcommand{\ntsubset}[4]{$#1 \nleq_{#2 \rightarrow #4} #3$}
-
-\newcommand{\define}[1]{\textcolor{red}{#1}}
 
 \begin{document}
-\newpage
+% \nipsfinalcopy is no longer used
+
 \maketitle
 
-\abstract{We are building some epic useless shit based on \cite{devlin2018bert}.}
+\begin{abstract}
+	We are building some epic useless shit based on \cite{devlin2018bert}.
+\end{abstract}
 
 \input{introduction}
 
@@ -103,6 +83,3 @@ initial text=$ $, % sets the text that appears on the start arrow
 \bibliographystyle{plain}
 
 \end{document}
-
-
-
