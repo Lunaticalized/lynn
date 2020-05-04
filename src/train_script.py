@@ -1,5 +1,8 @@
 import torch.nn as nn
+import transformers
 from transformers import BertPreTrainedModel, BertModel
+import torch.nn.functional as F
+from itertools import chain
 
 class BertExtractModel(BertPreTrainedModel):
     def __init__(self, config):
@@ -52,9 +55,7 @@ train_df = pd.read_csv('../input/tweet-sentiment-extraction/train.csv', keep_def
 test_df = pd.read_csv('../input/tweet-sentiment-extraction/test.csv', keep_default_na=False)
 sub_df = pd.read_csv('../input/tweet-sentiment-extraction/sample_submission.csv')
 
-train = np.array(train_df)
-
-# train = train[0:10]
+train = np.array(train_df[train_df['sentiment'] == 'positive'])
 
 def find_start_end_token_pos(input_str, sub_str, tokenizer):
     input = tokenizer.encode(input_str)
@@ -76,7 +77,7 @@ train = np.array(train, dtype = [('text', 'U144'), ('start', 'i'), ('end', 'i')]
 
 # build the dataset
 # ignore sentiment label for now
-BATCH_SIZE = 96
+BATCH_SIZE = 80
 
 def collate_tweets(sample):
     'given a list of samples, pad the encodings to the same length, and return the samples'
@@ -92,23 +93,48 @@ sampler = data.RandomSampler(train)
 loader = data.DataLoader(train, sampler=sampler, batch_size=BATCH_SIZE, collate_fn=collate_tweets)
 
 use_cuda = torch.cuda.is_available()
+
+# # for debug
+# train = train[0:10]
 # use_cuda = False
+
 device = torch.device("cuda:0" if use_cuda else "cpu")
 
 model = BertExtractModel.from_pretrained('bert-base-uncased')
 # model.half()                    # floating point half precision
 model.to(device)
 
-optimizer = optim.SGD(model.parameters(), lr=5e-5)
+no_decay = ["bias", "LayerNorm.weight"]
+optimizer_grouped_parameters = [
+    {
+        "params": [p for n, p in model.named_parameters() if not any(nd in n for nd in no_decay)],
+        "weight_decay": 0.3,
+    },
+    {
+        "params": [p for n, p in model.named_parameters() if any(nd in n for nd in no_decay)],
+        "weight_decay": 0.0,
+    },
+]
+lr = 5e-5
+num_training_steps = 1000
+num_warmup_steps = 100
+warmup_proportion = float(num_warmup_steps) / float(num_training_steps)
+optimizer_whole = transformers.AdamW(optimizer_grouped_parameters, lr=lr, correct_bias=False)
+scheduler = transformers.get_linear_schedule_with_warmup(optimizer_whole, num_warmup_steps=num_warmup_steps, num_training_steps=num_training_steps)
 
+addon_params = chain(model.qa_outputs.parameters())
+
+optimizer_logit = optim.SGD(addon_params, lr=1e-3, momentum = 0.9)
 model.train()
 
-num_epochs = 10
+num_epochs = 2
 for epoch in range(num_epochs):
     running_loss = 0.0
     for step, batch in enumerate(loader):
+        optimizer = optimizer_logit
+        if step % 2 == 1:
+            optimizer = optimizer_whole
         optimizer.zero_grad()
-
         batch = tuple(t.to(device) for t in batch)
         input_ids, start_pos, end_pos = batch
         outputs = model(input_ids, start_pos, end_pos)
@@ -129,11 +155,12 @@ model.eval()
 # try predict
 # TODO the output is a lowercase string, convert back to input case?
 # for now, ignore label
+test_df = test_df[test_df['sentiment'] == 'positive']
 test = np.array(test_df['text'])
 model.to(torch.device('cpu'))
 ans = []
 with torch.no_grad():
-    for item in test:
+    for item in test[0:100]:
         input = tokenizer.encode(item)
         out = model(torch.tensor(input).unsqueeze(0))
         start_logits, end_logits, *_ = out

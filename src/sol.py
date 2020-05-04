@@ -8,9 +8,6 @@ test_df = pd.read_csv('../input/tweet-sentiment-extraction/test.csv')
 sub_df = pd.read_csv('../input/tweet-sentiment-extraction/sample_submission.csv')
 
 train = np.array(train_df)
-# shuffle and subset
-np.random.shuffle(train)
-train = train[1:1000]
 test = np.array(test_df)
 
 
@@ -18,7 +15,7 @@ test = np.array(test_df)
 SETTINGS
 """
 
-# use_cuda = False # whether to use GPU or not
+use_cuda = True # whether to use GPU or not
 
 def find_all(input_str, search_str):
     l1 = []
@@ -82,7 +79,7 @@ def do_qa_test(test):
     for line in test:
         context = line[1]
         qas = []
-        question = line[-1]
+        question = 'why' + line[-1] + '?'
         qid = line[0]
         if type(context) != str or type(question) != str:
             print(context, type(context))
@@ -110,22 +107,20 @@ from simpletransformers.question_answering import QuestionAnsweringModel
 
 # Create the QuestionAnsweringModel
 model = QuestionAnsweringModel('distilbert', 
-							   'distilbert-base-uncased-distilled-squad',
+			       'distilbert-base-uncased-distilled-squad',
                                args={'reprocess_input_data': True,
                                      'overwrite_output_dir': True,
                                      'learning_rate': 5e-5,
-                                     'num_train_epochs': 5,
-                                     'max_seq_length': 80,
+                                     'num_train_epochs': 3,
+                                     'max_seq_length': 144,
                                      'doc_stride': 64,
-                                     'train_batch_size': 4,
+                                     'train_batch_size': 80,
                                      'fp16': False,
 
                                     },
                                 use_cuda=True)
 
 model.train_model('../working/train.json')
-
-
 
 predictions = model.predict(qa_test)
 predictions_df = pd.DataFrame.from_dict(predictions)
