@@ -1,1 +1,5 @@
 \section{Discussions and concluding remarks} \label{sec:discussion}
+
+Our model demonstrates that BERT with a layer of logistical regression could successfully extract the supporting phrase of a tweet with \score\ loss. We also tested adding a Question and Answering layer in between BERT and logistical regression, where the context is the tweet, question is one of positive, neutral or negative, and the answer is  the supporting phrase. However due to time limitations, we were not able to train this new model and evaluate its performance. However, we do learn that some Kaggle contestants achieved a lower loss using this method. We have not tested the model with other variants of BERT. 
+
+It is also interesting to explore whether there is a method that can extract supporting phrases that are not continuous.
