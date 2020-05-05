@@ -1,0 +1,10 @@
+textID,text,selected_text,sentiment
+a3d0a7d5ad,"Spent the entire morning in a meeting w/ a vendor, and my boss was not happy w/ them. Lots of fun.  I had other plans for my morning",my boss was not happy w/ them. Lots of fun.,neutral
+251b6a6766, Oh! Good idea about putting them on ice cream,Good,positive
+c9e8d1ef1c,says good (or should i say bad?) afternoon!  http://plurk.com/p/wxpdj,says good (or should i say bad?) afternoon!,neutral
+f14f087215, i dont think you can vote anymore! i tried,i dont think you can vote anymore!,negative
+bf7473b12d, haha better drunken tweeting you mean?,better,positive
+1915bebcb3,headache  wanna see my Julie,headache,negative
+2ab82634d5,had an awsome salad! I recommend getting the Spicey buffalo chicken salad!,had an awsome salad!,positive
+a5a1c996c0, fine! Going to do my big walk today 20 or so miles,fine!,positive
+a182b2638e, Thank a yoou  how are you? #TwitterTakeover,Thank,positive
