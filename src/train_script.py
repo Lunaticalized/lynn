@@ -1,22 +1,24 @@
 import torch.nn as nn
 import transformers
-from transformers import BertPreTrainedModel, BertModel
+from transformers import DistilBertPreTrainedModel, DistilBertModel
 import torch.nn.functional as F
 from itertools import chain
 
-class BertExtractModel(BertPreTrainedModel):
+class BertExtractModel(DistilBertPreTrainedModel):
     def __init__(self, config):
         super(BertExtractModel, self).__init__(config)
-        self.num_labels = 2
-        self.bert = BertModel(config)
-        self.qa_outputs = nn.Linear(config.hidden_size, config.num_labels)
+        self.num_labels = 6     # pos-start, pos-end, neut-start, etc.
+        self.bert = DistilBertModel(config)
+        self.logit = nn.Linear(config.dim, self.num_labels)
         self.init_weights()
 
-    def forward(self, input_ids=None, start_positions=None, end_positions=None):
+    def forward(self, sentiments=None,
+                input_ids=None, start_positions=None, end_positions=None):
         outputs = self.bert(input_ids)
         sequence_output = outputs[0]
+        senti_index = torch.stack((2 * sentiments, 2 * sentiments + 1), dim=1)
 
-        logits = self.qa_outputs(sequence_output)
+        logits = torch.stack([ torch.index_select(b, 1, senti_index[i]) for i, b in enumerate(torch.unbind(self.logit(sequence_output)))], dim=0)
         start_logits, end_logits = logits.split(1, dim=-1)
         start_logits = start_logits.squeeze(-1)
         end_logits = end_logits.squeeze(-1)
@@ -46,16 +48,18 @@ import pandas as pd
 
 import torch
 from torch.utils import data
-from transformers import BertTokenizer
+from transformers import DistilBertTokenizer
 import torch.optim as optim
-
-# from bert_extract import BertExtractModel
 
 train_df = pd.read_csv('../input/tweet-sentiment-extraction/train.csv', keep_default_na=False)
 test_df = pd.read_csv('../input/tweet-sentiment-extraction/test.csv', keep_default_na=False)
 sub_df = pd.read_csv('../input/tweet-sentiment-extraction/sample_submission.csv')
 
-train = np.array(train_df[train_df['sentiment'] == 'positive'])
+sentiment_dict = {'positive': 0, 'neutral' : 1, 'negative': 2}
+train_df['sentiment'] = [sentiment_dict[x] for x in train_df['sentiment']]
+test_df['sentiment'] = [sentiment_dict[x] for x in test_df['sentiment']]
+
+train = np.array(train_df)
 
 def find_start_end_token_pos(input_str, sub_str, tokenizer):
     input = tokenizer.encode(input_str)
@@ -68,41 +72,55 @@ def find_start_end_token_pos(input_str, sub_str, tokenizer):
             matchpos = pos
     return matchpos, matchpos + len(output)
 
-tokenizer = BertTokenizer.from_pretrained("bert-base-uncased")
+tokenizer = DistilBertTokenizer.from_pretrained("distilbert-base-uncased")
         
 # data shape: structured array (text, start, end)
-train = list(map(lambda x: (x[1],) + find_start_end_token_pos(x[1],x[2],tokenizer), train))
-train = list(filter(lambda x: x[1] != -1, train)) # discard the entries where there's no match
-train = np.array(train, dtype = [('text', 'U144'), ('start', 'i'), ('end', 'i')])
+train = list(map(lambda x: (x[0],x[1],x[3]) +
+                 find_start_end_token_pos(x[1],x[2],tokenizer), train))
+train = list(filter(lambda x: x[3] != -1, train)) # discard the entries where there's no match
+DATA_TYPE = [('id', 'U10'),
+             ('text', 'U144'),
+             ('sentiment', 'i'),
+             ('start', 'i'),
+             ('end', 'i')]
+train = np.array(train, dtype = DATA_TYPE)
 
 # build the dataset
 # ignore sentiment label for now
-BATCH_SIZE = 80
+BATCH_SIZE = 128
 
 def collate_tweets(sample):
     'given a list of samples, pad the encodings to the same length, and return the samples'
-    sample = np.array(sample, dtype = [('text', 'U144'), ('start', 'i'), ('end', 'i')])
+    sample = np.array(sample, dtype = DATA_TYPE)
     max_len = max(list(map(len,sample['text'])))
-    batch_encoding = tokenizer.batch_encode_plus(sample['text'], return_tensors='pt', pad_to_max_length=True, max_length = max_len)
+    batch_encoding = tokenizer.batch_encode_plus(sample['text'],
+                                                 return_tensors='pt',
+                                                 pad_to_max_length=True,
+                                                 max_length=max_len)
+    sentiments = torch.tensor(sample['sentiment'], dtype=torch.long)
     input_ids = batch_encoding.get('input_ids')
     start_pos = torch.tensor(sample['start'], dtype=torch.long)
     end_pos = torch.tensor(sample['end'], dtype=torch.long)
-    return input_ids, start_pos, end_pos
-
-sampler = data.RandomSampler(train)
-loader = data.DataLoader(train, sampler=sampler, batch_size=BATCH_SIZE, collate_fn=collate_tweets)
+    return sentiments, input_ids, start_pos, end_pos
 
 use_cuda = torch.cuda.is_available()
 
+NUM_EPOCHS = 4
+
 # # for debug
-# train = train[0:10]
+# train = train[0:5]
 # use_cuda = False
+# BATCH_SIZE = 2
+# NUM_EPOCHS = 3
 
 device = torch.device("cuda:0" if use_cuda else "cpu")
 
-model = BertExtractModel.from_pretrained('bert-base-uncased')
+model = BertExtractModel.from_pretrained('distilbert-base-uncased')
 # model.half()                    # floating point half precision
 model.to(device)
+
+sampler = data.RandomSampler(train)
+loader = data.DataLoader(train, sampler=sampler, batch_size=BATCH_SIZE, collate_fn=collate_tweets)
 
 no_decay = ["bias", "LayerNorm.weight"]
 optimizer_grouped_parameters = [
@@ -122,31 +140,30 @@ warmup_proportion = float(num_warmup_steps) / float(num_training_steps)
 optimizer_whole = transformers.AdamW(optimizer_grouped_parameters, lr=lr, correct_bias=False)
 scheduler = transformers.get_linear_schedule_with_warmup(optimizer_whole, num_warmup_steps=num_warmup_steps, num_training_steps=num_training_steps)
 
-addon_params = chain(model.qa_outputs.parameters())
+addon_params = chain(model.logit.parameters())
 
 optimizer_logit = optim.SGD(addon_params, lr=1e-3, momentum = 0.9)
 model.train()
 
-num_epochs = 2
-for epoch in range(num_epochs):
+for epoch in range(NUM_EPOCHS):
     running_loss = 0.0
     for step, batch in enumerate(loader):
         optimizer = optimizer_logit
-        if step % 2 == 1:
+        if step % 2 == 1 or epoch > 2:
             optimizer = optimizer_whole
         optimizer.zero_grad()
         batch = tuple(t.to(device) for t in batch)
-        input_ids, start_pos, end_pos = batch
-        outputs = model(input_ids, start_pos, end_pos)
+        senti, input_ids, start_pos, end_pos = batch
+        outputs = model(senti, input_ids, start_pos, end_pos)
         loss = outputs[0]
 
         loss.backward()
         optimizer.step()
 
         running_loss += loss.item()
-        if step % 10 == 0:    # print every 5 mini-batches
+        if step % 10 == 9:    # print every n mini-batches
             print('[%d, %5d] loss: %.3f' %
-                  (epoch + 1, step, running_loss / 10))
+                  (epoch + 1, step + 1, running_loss / 10))
             running_loss = 0.0
 
 print('finished training')
@@ -155,23 +172,21 @@ model.eval()
 # try predict
 # TODO the output is a lowercase string, convert back to input case?
 # for now, ignore label
-test_df = test_df[test_df['sentiment'] == 'positive']
-test = np.array(test_df['text'])
 model.to(torch.device('cpu'))
 ans = []
 with torch.no_grad():
-    for item in test[0:100]:
-        input = tokenizer.encode(item)
-        out = model(torch.tensor(input).unsqueeze(0))
+    for i, row in test_df.iterrows():
+        input = tokenizer.encode(row['text'])
+        senti = row['sentiment']
+        out = model(torch.tensor(senti).unsqueeze(0), torch.tensor(input).unsqueeze(0))
         start_logits, end_logits, *_ = out
         start = np.argmax(start_logits.squeeze(0))
         end = np.argmax(end_logits.squeeze(0))
         ans.append(tokenizer.decode(input[start:end]))
-
-with open('ans.txt', 'w') as file:
-    for i,item in enumerate(ans):
-        file.write('%s\n' % item)
         if i % 50 == 0:
-            print('testing: ', i, '/', len(test))
+            print('testing: ', i, '/', len(test_df))
+
+sub_df['selected_text'] = ans
+sub_df.to_csv("submission.csv")
 
 print('done')
