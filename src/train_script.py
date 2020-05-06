@@ -72,7 +72,7 @@ def find_start_end_token_pos(input_str, sub_str, tokenizer):
             matchpos = pos
     return matchpos, matchpos + len(output)
 
-tokenizer = DistilBertTokenizer.from_pretrained("distilbert-base-uncased")
+tokenizer = DistilBertTokenizer.from_pretrained("../input/distilbertrelated/")
         
 # data shape: structured array (text, start, end)
 train = list(map(lambda x: (x[0],x[1],x[3]) +
@@ -108,14 +108,14 @@ use_cuda = torch.cuda.is_available()
 NUM_EPOCHS = 4
 
 # # for debug
-# train = train[0:5]
+# train = train[0:1]
 # use_cuda = False
-# BATCH_SIZE = 2
-# NUM_EPOCHS = 3
+# BATCH_SIZE = 1
+# NUM_EPOCHS = 1
 
 device = torch.device("cuda:0" if use_cuda else "cpu")
 
-model = BertExtractModel.from_pretrained('distilbert-base-uncased')
+model = BertExtractModel.from_pretrained("../input/distilbertrelated/")
 # model.half()                    # floating point half precision
 model.to(device)
 
@@ -187,6 +187,6 @@ with torch.no_grad():
             print('testing: ', i, '/', len(test_df))
 
 sub_df['selected_text'] = ans
-sub_df.to_csv("submission.csv")
+sub_df.to_csv("submission.csv", index=False)
 
 print('done')
