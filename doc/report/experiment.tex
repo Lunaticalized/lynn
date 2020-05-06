@@ -1,1 +1,14 @@
 \section{Experiments} \label{sec:experiment}
+
+The performance is evaluated by the averaged Jaccard score. The Jaccard score between two sentences $s_1$ and $s_2$, both represented by an array of words, is defined as $$score(s_1, s_2) = \frac{|s_1 \cap s_2|}{|s_1 \cup s_2|}.$$ The test set contains 3,534 tweets samples.
+
+Our experiment on the Kaggle dataset initially achieved an averaged Jaccard score of 0.491, using our model presented in Section~\ref{sec:model}. We later improved the model with the following preprocessing and tweeks:
+
+\begin{itemize}
+	\item Preprocess all tweets such that all urls, links and @ references are removed from the training set; and
+	\item For tweets with neutral sentiments, we simply return the entire string.  
+\end{itemize}
+
+The averaged Jaccard score is improved to 0.564.
+ 
+We are also constructing a model in which we train two separate models on the positive sentiments and the negative sentiments respectively, and then apply the corresponding trained model based on the test sample sentiment. 
