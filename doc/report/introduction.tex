@@ -5,7 +5,7 @@ Sentiment analysis is a critical task for industries involving product recommend
 Support phrase extraction extends beyond the classification task---given the sentiment of the tweet, it also asks for the specific phrase within the tweet that supports the classified sentiment. This allows a more fine-grained representation of the tweet senders' sentiments. Currently there is an undergoing \href{https://www.kaggle.com/c/tweet-sentiment-extraction}{Kaggle competition} for support phrase extraction: Given a set tweets, each with its true emotional label, find the supporting phrase within each tweet supporting its sentiment. 
 
 
-Our solution uses BERT (Bidirectional Encoder Representations from Transformers), a state-of-the-art tool for sentiment analysis \cite{devlin2018bert}. 
+Our solution uses distill BERT (Bidirectional Encoder Representations from Transformers), a state-of-the-art tool for sentiment analysis \cite{devlin2018bert} \cite{sanh2019distilbert}. 
 
 
 \paragraph{Organization} In Section~\ref{sec:model} we describe the input dataset and our model; In Section~\ref{sec:experiment} we present the experimental results of our model; and finally in Section\ref{sec:discussion} we discuss some limitations of our model.
