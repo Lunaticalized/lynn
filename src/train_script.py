@@ -4,14 +4,13 @@ from transformers import DistilBertPreTrainedModel, DistilBertModel
 import torch.nn.functional as F
 from itertools import chain
 
-class BertExtractModel(DistilBertPreTrainedModel):
-    def __init__(self, config):
-        super(BertExtractModel, self).__init__(config)
-        self.num_labels = 6     # pos-start, pos-end, neut-start, etc.
-        self.bert = DistilBertModel(config)
-        self.logit = nn.Linear(config.dim, self.num_labels)
-        self.init_weights()
-
+class BertExtractModel(nn.Module):
+    def __init__(self):
+        super(BertExtractModel, self).__init__()
+        self.num_labels = 4     # pos-start, pos-end, neg-start, neg-end
+        self.bert = DistilBertModel.from_pretrained("../input/distilbertrelated/")
+        self.logit = nn.Linear(self.bert.config.dim, self.num_labels, bias=False)
+        
     def forward(self, sentiments=None,
                 input_ids=None, start_positions=None, end_positions=None):
         outputs = self.bert(input_ids)
@@ -55,7 +54,9 @@ train_df = pd.read_csv('../input/tweet-sentiment-extraction/train.csv', keep_def
 test_df = pd.read_csv('../input/tweet-sentiment-extraction/test.csv', keep_default_na=False)
 sub_df = pd.read_csv('../input/tweet-sentiment-extraction/sample_submission.csv')
 
-sentiment_dict = {'positive': 0, 'neutral' : 1, 'negative': 2}
+train_df = train_df[train_df['sentiment'] != 'neutral'] # ignore neutral ones
+
+sentiment_dict = {'positive': 0, 'neutral' : 2, 'negative': 1}
 train_df['sentiment'] = [sentiment_dict[x] for x in train_df['sentiment']]
 test_df['sentiment'] = [sentiment_dict[x] for x in test_df['sentiment']]
 
@@ -108,14 +109,14 @@ use_cuda = torch.cuda.is_available()
 NUM_EPOCHS = 4
 
 # # for debug
-# train = train[0:1]
+# train = train[0:10]
 # use_cuda = False
 # BATCH_SIZE = 1
 # NUM_EPOCHS = 1
 
 device = torch.device("cuda:0" if use_cuda else "cpu")
 
-model = BertExtractModel.from_pretrained("../input/distilbertrelated/")
+model = BertExtractModel()
 # model.half()                    # floating point half precision
 model.to(device)
 
@@ -174,15 +175,37 @@ model.eval()
 # for now, ignore label
 model.to(torch.device('cpu'))
 ans = []
+
+import re
+def back_to_cased(selected, text):
+    m = re.search(selected, text, re.IGNORECASE)
+    if m is not None:
+        return m[0]
+    else:
+        raise ValueError(selected, text)
+
+def clean_input(text):
+    # strip URLs
+    urlpat = re.compile(r'https?:\/\/.*\b')
+    text = urlpat.sub('', text)
+    # strip underscore stuff
+    pat = re.compile(r'@?_.*?\b')
+    text = pat.sub('', text)
+    return text.strip()
+
 with torch.no_grad():
     for i, row in test_df.iterrows():
-        input = tokenizer.encode(row['text'])
+        input_text = clean_input(row['text'])
+        input = tokenizer.encode(input_text)
         senti = row['sentiment']
-        out = model(torch.tensor(senti).unsqueeze(0), torch.tensor(input).unsqueeze(0))
-        start_logits, end_logits, *_ = out
-        start = np.argmax(start_logits.squeeze(0))
-        end = np.argmax(end_logits.squeeze(0))
-        ans.append(tokenizer.decode(input[start:end]))
+        if senti == 2:          # neutral just predict the whole thing
+            ans.append(input_text)
+        else:
+            out = model(torch.tensor(senti).unsqueeze(0), torch.tensor(input).unsqueeze(0))
+            start_logits, end_logits, *_ = out
+            start = np.argmax(start_logits.squeeze(0))
+            end = np.argmax(end_logits.squeeze(0))
+            ans.append(tokenizer.decode(input[start:end]))
         if i % 50 == 0:
             print('testing: ', i, '/', len(test_df))
 
