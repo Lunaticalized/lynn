@@ -1,13 +1,13 @@
 {
-  "id": "coldcat/lynnneh-try",
-  "title": "lynnneh-try",
+  "id": "coldcat/kernela9eb38c22c",
+  "title": "kernela9eb38c22c",
   "code_file": "src/train_script.py",
   "language": "python",
   "kernel_type": "script",
   "is_private": "true",
   "enable_gpu": "true",
-  "enable_internet": "true",
-  "dataset_sources": [],
+  "enable_internet": "false",
+  "dataset_sources": ["coldcat/distilbertrelated"],
   "competition_sources": ["tweet-sentiment-extraction"],
   "kernel_sources": []
 }
